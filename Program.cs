@@ -1,7 +1,13 @@
+using WebMVC.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IStudentService, StudentService>();
+builder.Services.AddSingleton<IAttendanceService, AttendanceService>();
+
+
 
 var app = builder.Build();
 

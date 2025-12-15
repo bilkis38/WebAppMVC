@@ -1,0 +1,65 @@
+@model IEnumerable<WebMVC.Models.Attendance>
+@{
+    ViewData["Title"] = "Attendance List";
+}
+
+<h2>Attendance List</h2>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add New Attendance</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Date)</th>
+            <th>Participant</th>
+            <th>Email</th>
+            <th>@Html.DisplayNameFor(model => model.Status)</th>
+            <th>@Html.DisplayNameFor(model => model.Note)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Student?.Name</td>
+                    <td>@item.Student?.Email</td>
+                    <td>
+                        @if (item.Status == "Present")
+                        {
+                            <span class="badge bg-success">@item.Status</span>
+                        }
+                        else if (item.Status == "Sick")
+                        {
+                            <span class="badge bg-warning text-dark">@item.Status</span>
+                        }
+                        else if (item.Status == "Permission")
+                        {
+                            <span class="badge bg-info text-dark">@item.Status</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">@item.Status</span>
+                        }
+                    </td>
+                    <td>@item.Note</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">No attendance data available</td>
+            </tr>
+        }
+    </tbody>
+</table>
