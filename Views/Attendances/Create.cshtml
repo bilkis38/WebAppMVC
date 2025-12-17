@@ -13,7 +13,7 @@
             
             <div class="form-group mb-3">
                 <label asp-for="StudentId" class="form-label"></label>
-                <select asp-for="StudentId" class="form-select" asp-items="ViewBag.Participants">
+                <select asp-for="StudentId" class="form-select" asp-items="ViewBag.Students">
                     <option value="">-- Select Participant --</option>
                 </select>
                 <span asp-validation-for="StudentId" class="text-danger"></span>

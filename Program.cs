@@ -1,11 +1,18 @@
 using WebMVC.Services;
+using Microsoft.EntityFrameworkCore;
+using WebMVC.Data;
+
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<IStudentService, StudentService>();
-builder.Services.AddSingleton<IAttendanceService, AttendanceService>();
+// builder.Services.AddSingleton<IStudentService, StudentService>();
+// builder.Services.AddSingleton<IAttendanceService, AttendanceService>();
 
 
 
@@ -30,6 +37,21 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred seeding the DB.");
+    }
+}
 
 
 app.Run();

@@ -1,87 +1,138 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using WebMVC.Models;
-using WebMVC.Services;
+// using WebMVC.Services;
+using WebMVC.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebMVC.Controllers
 {
     public class AttendancesController : Controller
     {
-        private readonly IAttendanceService _attendanceService;
-        private readonly IStudentService _studentService;
+        private readonly ApplicationDbContext _context;
 
-        public AttendancesController(IAttendanceService attendanceService, IStudentService studentService)
+        public AttendancesController(ApplicationDbContext context)
         {
-            _attendanceService = attendanceService;
-            _studentService = studentService;
+            _context = context;
         }
 
         // GET: Attendances
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var attendances = _attendanceService.GetAllAttendances();
-            return View(attendances);
+            var aatendances = await _context.Attendance
+                .Include(a => a.Student)
+                .ToListAsync();
+            return View(aatendances);
         }
 
-        // GET: Attendances/Create
-        public IActionResult Create()
+        // GET: Attendances/Details/{id}
+        public async Task<IActionResult> Details(int? id)
         {
-            PopulateParticipantsDropdown();
-            ViewBag.StatusList = GetStatusList();
-            return View();
-        }
-
-        // POST: Attendances/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Attendance attendance)
-        {
-            if (ModelState.IsValid)
+            if (id == null)
             {
-                _attendanceService.AddAttendance(attendance);
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            PopulateParticipantsDropdown();
-            ViewBag.StatusList = GetStatusList();
-            return View(attendance);
-        }
 
-        // GET: Attendances/Edit/5
-        public IActionResult Edit(int id)
-        {
-            var attendance = _attendanceService.GetAttendanceById(id);
+            var attendance = await _context.Attendance
+                .Include(a => a.Student)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (attendance == null)
             {
                 return NotFound();
             }
-            PopulateParticipantsDropdown();
+
+            return View(attendance);
+        }
+
+        // GET: Attendance/Create
+        public async Task<IActionResult> Create()
+        {
+            await PopulateStudentsDropdown();
+            ViewBag.StatusList = GetStatusList();
+            return View();
+        }
+
+        // POST: Attendance/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,StudentId,Date,Status,Notes")] Attendance attendance)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(attendance);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            await PopulateStudentsDropdown();
             ViewBag.StatusList = GetStatusList();
             return View(attendance);
         }
 
-        // POST: Attendances/Edit/5
+        // GET: Attendance/Edit/{id}
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var attendance = await _context.Attendance.FindAsync(id);
+            if (attendance == null)
+            {
+                return NotFound();
+            }
+            await PopulateStudentsDropdown();
+            ViewBag.StatusList = GetStatusList();
+            return View(attendance);
+        }
+
+        // POST: Attendance/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Attendance attendance)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,StudentId,Date,Status,Notes")] Attendance attendance)
         {
             if (id != attendance.Id)
             {
                 return NotFound();
             }
+
             if (ModelState.IsValid)
             {
-                _attendanceService.UpdateAttendance(attendance);
+                try
+                {
+                    _context.Update(attendance);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!AttendanceExists(attendance.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
-            PopulateParticipantsDropdown();
+            await PopulateStudentsDropdown();
             ViewBag.StatusList = GetStatusList();
             return View(attendance);
         }
 
-        // GET: Attendances/Delete/5
-        public IActionResult Delete(int id)
+        // GET: Attendance/Delete/{id}
+        public async Task<IActionResult> Delete(int? id)
         {
-            var attendance = _attendanceService.GetAttendanceById(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var attendance = await _context.Attendance
+                .Include(a => a.Student)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (attendance == null)
             {
                 return NotFound();
@@ -89,30 +140,22 @@ namespace WebMVC.Controllers
             return View(attendance);
         }
 
-        // POST: Attendances/Delete/5
+        // POST: Attendance/Delete/{id}
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            _attendanceService.DeleteAttendance(id);
+            var attendance = await _context.Attendance.FindAsync(id);
+            _context.Attendance.Remove(attendance);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Attendances/Details/5
-        public IActionResult Details(int id)
+        // Helper Methods
+        private async Task PopulateStudentsDropdown()
         {
-            var attendance = _attendanceService.GetAttendanceById(id);
-            if (attendance == null)
-            {
-                return NotFound();
-            }
-            return View(attendance);
-        }
-
-        private void PopulateParticipantsDropdown()
-        {
-            var students = _studentService.GetAllStudents();
-            ViewBag.Participants = new SelectList(students, "Id", "Name");
+            var students = await _context.Students.ToListAsync();
+            ViewBag.Students = new SelectList(students, "Id", "Name");
         }
 
         private List<SelectListItem> GetStatusList()
@@ -124,6 +167,11 @@ namespace WebMVC.Controllers
                 new SelectListItem { Value = "Sick", Text = "Sick" },
                 new SelectListItem { Value = "Permission", Text = "Permission" }
             };
+        }
+
+        private bool AttendanceExists(int id)
+        {
+            return _context.Attendance.Any(e => e.Id == id);
         }
     }
 }

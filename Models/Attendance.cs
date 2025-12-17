@@ -4,6 +4,7 @@ namespace WebMVC.Models
 {
     public class Attendance
     {
+         [Key]
         public int Id { get; set; }
         
         [Required(ErrorMessage = "Participant harus dipilih")]
@@ -25,5 +26,7 @@ namespace WebMVC.Models
         
         // Navigation property
         public Student? Student { get; set; }
+
+        
     }
 }
