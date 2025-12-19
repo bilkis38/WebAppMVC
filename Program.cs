@@ -2,8 +2,7 @@ using WebMVC.Services;
 using Microsoft.EntityFrameworkCore;
 using WebMVC.Data;
 using Asp.Versioning;
-using Asp.Versioning.Routing;
-
+using Asp.Versioning.ApiExplorer;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -15,20 +14,43 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// API Versioning Configuration
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader()
+    );
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
+// Swagger Configuration
+builder.Services.AddSwaggerGen(options =>
+{
+    var provider = builder.Services.BuildServiceProvider()
+        .GetRequiredService<IApiVersionDescriptionProvider>();
+
+    foreach (var description in provider.ApiVersionDescriptions)
+    {
+        options.SwaggerDoc(description.GroupName, new()
+        {
+            Title = $"WebMVC API {description.ApiVersion}",
+            Version = description.ApiVersion.ToString()
+        });
+    }
+});
 
 // REGISTER SEMUA SERVICES
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
-builder.Services.AddScoped<IEnrollmentService, EnrollmentService>(); 
-
-
-builder.Services.Configure<RouteOptions>(options =>
-{
-    options.ConstraintMap.Add("apiVersion", typeof(ApiVersionRouteConstraint));
-});
-
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 var app = builder.Build();
 
@@ -36,22 +58,29 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-// Configure the HTTP request pipeline.
+// Swagger UI for Development
 if (app.Environment.IsDevelopment())
 {
-app.UseSwagger(); // Mengaktifkan middleware Swagger
-app.UseSwaggerUI(); // Mengaktifkan middleware Swagger UI
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+        
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint(
+                $"/swagger/{description.GroupName}/swagger.json",
+                $"WebMVC API {description.GroupName.ToUpperInvariant()}");
+        }
+    });
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
