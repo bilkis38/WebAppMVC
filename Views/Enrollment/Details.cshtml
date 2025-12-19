@@ -1,0 +1,81 @@
+@model WebMVC.Models.Enrollment
+
+@{
+    ViewData["Title"] = "Detail Enrollment";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4>@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID:</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4">Student:</dt>
+                        <dd class="col-sm-8">
+                            <strong>@Model.Student?.Name</strong><br />
+                            <small class="text-muted">@Model.Student?.Email</small>
+                        </dd>
+
+                        <dt class="col-sm-4">Course:</dt>
+                        <dd class="col-sm-8">
+                            <strong>@Model.Course?.CourseName</strong><br />
+                            <small class="text-muted">Kode: @Model.Course?.CourseCode</small><br />
+                            <small class="text-muted">Instruktur: @Model.Course?.Instructor</small>
+                        </dd>
+
+                        <dt class="col-sm-4">Tanggal Daftar:</dt>
+                        <dd class="col-sm-8">@Model.EnrollmentDate.ToString("dd MMMM yyyy")</dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Status == "Active")
+                            {
+                                <span class="badge bg-success">@Model.Status</span>
+                            }
+                            else if (Model.Status == "Completed")
+                            {
+                                <span class="badge bg-primary">@Model.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Nilai:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Grade.HasValue)
+                            {
+                                <span class="badge bg-info text-dark fs-6">@Model.Grade.Value.ToString("0.00")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Belum ada nilai</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </a>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Hapus
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

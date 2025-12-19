@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebMVC.Data;
 
@@ -11,9 +12,11 @@ using WebMVC.Data;
 namespace WebMVC.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251218220118_AddEnrollmentTable")]
+    partial class AddEnrollmentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,40 +88,6 @@ namespace WebMVC.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CourseCode = "CS101",
-                            CourseName = "Pemrograman Dasar",
-                            Description = "Mempelajari dasar-dasar pemrograman menggunakan C#",
-                            Instructor = "Prof. Budi Santoso"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CourseCode = "MTK102",
-                            CourseName = "Matematika Diskrit",
-                            Description = "Logika matematika dan struktur diskrit",
-                            Instructor = "Dr. Siti Aminah"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CourseCode = "CS103",
-                            CourseName = "Struktur Data",
-                            Description = "Array, Linked List, Stack, Queue, Tree, Graph",
-                            Instructor = "Prof. Ahmad Dahlan"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CourseCode = "CS104",
-                            CourseName = "Basis Data",
-                            Description = "Desain database, SQL, normalisasi",
-                            Instructor = "Dr. Rina Wijaya"
-                        });
                 });
 
             modelBuilder.Entity("WebMVC.Models.Enrollment", b =>
@@ -154,72 +123,6 @@ namespace WebMVC.Migrations
                         .IsUnique();
 
                     b.ToTable("Enrollments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CourseId = 1,
-                            EnrollmentDate = new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CourseId = 2,
-                            EnrollmentDate = new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CourseId = 3,
-                            EnrollmentDate = new DateTime(2024, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CourseId = 1,
-                            EnrollmentDate = new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 2
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CourseId = 4,
-                            EnrollmentDate = new DateTime(2024, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CourseId = 2,
-                            EnrollmentDate = new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 3
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CourseId = 3,
-                            EnrollmentDate = new DateTime(2024, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 3
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CourseId = 4,
-                            EnrollmentDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = "Active",
-                            StudentId = 4
-                        });
                 });
 
             modelBuilder.Entity("WebMVC.Models.Student", b =>
@@ -254,40 +157,6 @@ namespace WebMVC.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("Students");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "Jl. Merdeka No. 10, Jakarta",
-                            Email = "budi.setiawan@mail.com",
-                            Name = "Budi Setiawan",
-                            PhoneNumber = "081234567890"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "Jl. Sudirman No. 25, Bandung",
-                            Email = "siti.nurhaliza@mail.com",
-                            Name = "Siti Nurhaliza",
-                            PhoneNumber = "081234567891"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Address = "Jl. Diponegoro No. 15, Surabaya",
-                            Email = "ahmad.yani@mail.com",
-                            Name = "Ahmad Yani",
-                            PhoneNumber = "081234567892"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Address = "Jl. Gatot Subroto No. 30, Yogyakarta",
-                            Email = "dewi.lestari@mail.com",
-                            Name = "Dewi Lestari",
-                            PhoneNumber = "081234567893"
-                        });
                 });
 
             modelBuilder.Entity("WebMVC.Models.Attendance", b =>

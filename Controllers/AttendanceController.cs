@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using WebMVC.Models;
-// using WebMVC.Services;
 using WebMVC.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,10 +18,11 @@ namespace WebMVC.Controllers
         // GET: Attendances
         public async Task<IActionResult> Index()
         {
-            var aatendances = await _context.Attendance
+            var attendances = await _context.Attendances
                 .Include(a => a.Student)
+                .OrderByDescending(a => a.Date)
                 .ToListAsync();
-            return View(aatendances);
+            return View(attendances);
         }
 
         // GET: Attendances/Details/{id}
@@ -33,7 +33,7 @@ namespace WebMVC.Controllers
                 return NotFound();
             }
 
-            var attendance = await _context.Attendance
+            var attendance = await _context.Attendances
                 .Include(a => a.Student)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (attendance == null)
@@ -55,15 +55,22 @@ namespace WebMVC.Controllers
         // POST: Attendance/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,StudentId,Date,Status,Notes")] Attendance attendance)
+        public async Task<IActionResult> Create([Bind("StudentId,Date,Status,Note")] Attendance attendance)
         {
+            // Validasi tanggal tidak boleh masa lampau
+            if (attendance.Date.Date < DateTime.Now.Date)
+            {
+                ModelState.AddModelError("Date", "Tanggal tidak boleh di masa lampau");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(attendance);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            await PopulateStudentsDropdown();
+
+            await PopulateStudentsDropdown(attendance.StudentId);  // ← TAMBAHIN parameter
             ViewBag.StatusList = GetStatusList();
             return View(attendance);
         }
@@ -76,12 +83,13 @@ namespace WebMVC.Controllers
                 return NotFound();
             }
 
-            var attendance = await _context.Attendance.FindAsync(id);
+            var attendance = await _context.Attendances.FindAsync(id);
             if (attendance == null)
             {
                 return NotFound();
             }
-            await PopulateStudentsDropdown();
+            
+            await PopulateStudentsDropdown(attendance.StudentId);  // ← Pass StudentId
             ViewBag.StatusList = GetStatusList();
             return View(attendance);
         }
@@ -89,11 +97,17 @@ namespace WebMVC.Controllers
         // POST: Attendance/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,StudentId,Date,Status,Notes")] Attendance attendance)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,StudentId,Date,Status,Note")] Attendance attendance)
         {
             if (id != attendance.Id)
             {
                 return NotFound();
+            }
+
+            // Validasi tanggal tidak boleh masa lampau
+            if (attendance.Date.Date < DateTime.Now.Date)
+            {
+                ModelState.AddModelError("Date", "Tanggal tidak boleh di masa lampau");
             }
 
             if (ModelState.IsValid)
@@ -116,7 +130,8 @@ namespace WebMVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            await PopulateStudentsDropdown();
+
+            await PopulateStudentsDropdown(attendance.StudentId);  // ← DIBENERIN: tambahin parameter
             ViewBag.StatusList = GetStatusList();
             return View(attendance);
         }
@@ -129,7 +144,7 @@ namespace WebMVC.Controllers
                 return NotFound();
             }
 
-            var attendance = await _context.Attendance
+            var attendance = await _context.Attendances
                 .Include(a => a.Student)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -145,17 +160,20 @@ namespace WebMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var attendance = await _context.Attendance.FindAsync(id);
-            _context.Attendance.Remove(attendance);
-            await _context.SaveChangesAsync();
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance != null)
+            {
+                _context.Attendances.Remove(attendance);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
         // Helper Methods
-        private async Task PopulateStudentsDropdown()
+        private async Task PopulateStudentsDropdown(int? selectedStudentId = null)
         {
             var students = await _context.Students.ToListAsync();
-            ViewBag.Students = new SelectList(students, "Id", "Name");
+            ViewBag.Students = new SelectList(students, "Id", "Name", selectedStudentId);
         }
 
         private List<SelectListItem> GetStatusList()
@@ -171,7 +189,7 @@ namespace WebMVC.Controllers
 
         private bool AttendanceExists(int id)
         {
-            return _context.Attendance.Any(e => e.Id == id);
+            return _context.Attendances.Any(e => e.Id == id);
         }
     }
 }

@@ -1,32 +1,54 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebMVC.Models
 {
+    /// <summary>
+    /// Model Attendance untuk absensi student di course
+    /// </summary>
     public class Attendance
     {
-         [Key]
         public int Id { get; set; }
         
-        [Required(ErrorMessage = "Participant harus dipilih")]
-        [Display(Name = "Participant")]
-        public int StudentId { get; set; }
+        [Required]
+        [Display(Name = "Tanggal")]
+        public DateTime Date { get; set; } = DateTime.Now;
         
-        [Required(ErrorMessage = "Date harus diisi")]
-        [Display(Name = "Date")]
-        [DataType(DataType.Date)]
-        public DateTime Date { get; set; }
+        [Required(ErrorMessage = "Status kehadiran harus dipilih")]
+        [Display(Name = "Status Kehadiran")]
+        public string Status { get; set; } = string.Empty; // Hadir, Izin, Sakit, Alpha
         
-        [Required(ErrorMessage = "Status harus dipilih")]
-        [Display(Name = "Status")]
-        public string Status { get; set; } = string.Empty;
-        
-        [Display(Name = "Note")]
-        [StringLength(200)]
+        [Display(Name = "Keterangan")]
+        [StringLength(500, ErrorMessage = "Keterangan maksimal 500 karakter")]
         public string? Note { get; set; }
         
-        // Navigation property
-        public Student? Student { get; set; }
-
+        // Foreign Keys
+        [Required(ErrorMessage = "Student harus dipilih")]
+        [Display(Name = "Student")]
+        public int StudentId { get; set; }
         
+        [Required(ErrorMessage = "Course harus dipilih")]
+        [Display(Name = "Course")]
+        public int CourseId { get; set; }
+        
+        // Navigation Properties
+        public Student? Student { get; set; }
+        public Course? Course { get; set; }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

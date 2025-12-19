@@ -2,7 +2,6 @@ using WebMVC.Services;
 using Microsoft.EntityFrameworkCore;
 using WebMVC.Data;
 
-
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -11,10 +10,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-// builder.Services.AddSingleton<IStudentService, StudentService>();
-// builder.Services.AddSingleton<IAttendanceService, AttendanceService>();
 
-
+// REGISTER SEMUA SERVICES
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>(); // ✅ TAMBAHAN BARU
 
 var app = builder.Build();
 
@@ -52,6 +53,5 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred seeding the DB.");
     }
 }
-
 
 app.Run();

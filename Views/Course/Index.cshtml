@@ -1,0 +1,112 @@
+@model IEnumerable<WebMVC.Models.Course>
+
+@{
+    ViewData["Title"] = "Daftar Course";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Course Baru
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Belum ada course. Silakan tambah course baru.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var course in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">@course.CourseName</h5>
+                            <small>@course.CourseCode</small>
+                        </div>
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(course.Instructor))
+                            {
+                                <p class="mb-2">
+                                    <i class="bi bi-person-badge"></i>
+                                    <strong>Instruktur:</strong> @course.Instructor
+                                </p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(course.Description))
+                            {
+                                <p class="text-muted small">@course.Description</p>
+                            }
+
+                            <hr>
+
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-people-fill text-primary me-2"></i>
+                                <strong>@(course.Enrollments?.Count ?? 0) Peserta</strong>
+                            </div>
+
+                            @if (course.Enrollments != null && course.Enrollments.Any())
+                            {
+                                <div class="mb-2">
+                                    <small class="text-muted">Peserta terdaftar:</small>
+                                    <ul class="list-unstyled mt-1">
+                                        @foreach (var enrollment in course.Enrollments.Take(3))
+                                        {
+                                            <li class="small">• @enrollment.Student.Name</li>
+                                        }
+                                        @if (course.Enrollments.Count > 3)
+                                        {
+                                            <li class="small text-muted">• dan @(course.Enrollments.Count - 3) lainnya...</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted small">
+                                    <i class="bi bi-info-circle"></i> Belum ada peserta
+                                </p>
+                            }
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex gap-2 mb-2">
+                                <a asp-action="Detail" asp-route-id="@course.Id" class="btn btn-sm btn-info flex-fill">
+                                    <i class="bi bi-eye"></i> Detail
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-warning flex-fill">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@course.Id" class="btn btn-sm btn-danger flex-fill">
+                                    <i class="bi bi-trash"></i> Hapus
+                                </a>
+                            </div>
+                            <a asp-controller="Enrollment" asp-action="Create" asp-route-courseId="@course.Id" class="btn btn-sm btn-success w-100">
+                                <i class="bi bi-person-plus"></i> Tambah Peserta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .card-header {
+        border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+    }
+</style>

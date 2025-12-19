@@ -1,48 +1,110 @@
+using Microsoft.EntityFrameworkCore;
+using WebMVC.Data;
 using WebMVC.Models;
+
 namespace WebMVC.Services
 {
     public class StudentService : IStudentService
     {
-        private readonly List<Student> _students;
-        public StudentService()
+        private readonly ApplicationDbContext _context;
+
+        public StudentService(ApplicationDbContext context)
         {
-            _students = new List<Student>
-{
-            new Student { Id = 1, Name = "Alice", Email = "alice@example.com", Age = 20 },
-            new Student { Id = 2, Name = "Bob", Email = "bob@example.com", Age = 22 }
-};
+            _context = context;
         }
 
+        // METHOD LAMA (Synchronous) - Tetap ada biar gak error di controller lama
         public List<Student> GetAllStudents()
         {
-            return _students;
+            return _context.Students.ToList();
         }
-        public Student GetStudentById(int id)
+
+        public Student? GetStudentById(int id)
         {
-            return _students.FirstOrDefault(s => s.Id == id);
+            return _context.Students.Find(id);
         }
+
         public void AddStudent(Student student)
         {
-            student.Id = _students.Any() ? _students.Max(s => s.Id) + 1 : 1;
-            _students.Add(student);
+            _context.Students.Add(student);
+            _context.SaveChanges();
         }
+
         public void UpdateStudent(Student student)
         {
-            var existingStudent = _students.FirstOrDefault(s => s.Id == student.Id);
-            if (existingStudent != null)
-            {
-            }
-            existingStudent.Name = student.Name;
-            existingStudent.Email = student.Email;
-            existingStudent.Age = student.Age;
+            _context.Students.Update(student);
+            _context.SaveChanges();
         }
 
         public void DeleteStudent(int id)
         {
-            var student = _students.FirstOrDefault(s => s.Id == id);
+            var student = _context.Students.Find(id);
             if (student != null)
             {
-                _students.Remove(student);
+                _context.Students.Remove(student);
+                _context.SaveChanges();
+            }
+        }
+
+        //  METHOD BARU (Asynchronous) - Untuk Enrollment
+        public async Task<IEnumerable<Student>> GetAllStudentsAsync()
+        {
+            return await _context.Students
+                .Include(s => s.Enrollments)
+                    .ThenInclude(e => e.Course)
+                .ToListAsync();
+        }
+
+        public async Task<Student?> GetStudentByIdAsync(int id)
+        {
+            return await _context.Students
+                .Include(s => s.Enrollments)
+                    .ThenInclude(e => e.Course)
+                .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        public async Task<bool> CreateStudentAsync(Student student)
+        {
+            try
+            {
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateStudentAsync(Student student)
+        {
+            try
+            {
+                _context.Students.Update(student);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteStudentAsync(int id)
+        {
+            try
+            {
+                var student = await _context.Students.FindAsync(id);
+                if (student == null) return false;
+
+                _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

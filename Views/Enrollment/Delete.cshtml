@@ -1,0 +1,65 @@
+@model WebMVC.Models.Enrollment
+
+@{
+    ViewData["Title"] = "Hapus Enrollment";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4>@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Peringatan!</strong> Anda yakin ingin menghapus enrollment ini?
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Student:</dt>
+                        <dd class="col-sm-8">@Model.Student?.Name</dd>
+
+                        <dt class="col-sm-4">Course:</dt>
+                        <dd class="col-sm-8">@Model.Course?.CourseName</dd>
+
+                        <dt class="col-sm-4">Tanggal Daftar:</dt>
+                        <dd class="col-sm-8">@Model.EnrollmentDate.ToString("dd MMMM yyyy")</dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Status == "Active")
+                            {
+                                <span class="badge bg-success">@Model.Status</span>
+                            }
+                            else if (Model.Status == "Completed")
+                            {
+                                <span class="badge bg-primary">@Model.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Nilai:</dt>
+                        <dd class="col-sm-8">@(Model.Grade?.ToString("0.00") ?? "-")</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Batal
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
