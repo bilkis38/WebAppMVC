@@ -10,12 +10,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // REGISTER SEMUA SERVICES
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>(); // ✅ TAMBAHAN BARU
+
 
 var app = builder.Build();
 
@@ -25,6 +29,13 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+app.UseSwagger(); // Mengaktifkan middleware Swagger
+app.UseSwaggerUI(); // Mengaktifkan middleware Swagger UI
 }
 
 app.UseHttpsRedirection();
@@ -54,4 +65,5 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.MapControllers();
 app.Run();

@@ -28,22 +28,6 @@
                 <td>@(student.Email ?? "-")</td>
                 <td>@(student.PhoneNumber ?? "-")</td>
                 <td>
-                    @* Tampilkan course lama ATAU enrollments baru *@
-                    @* @if (student.Course != null) *@
-                    {
-                        @* <span class="badge bg-secondary">@student.Course.CourseName</span> *@
-                    }
-                    @if (student.Enrollments != null && student.Enrollments.Any())
-                    @* { *@
-                        @* @foreach (var enrollment in student.Enrollments) *@
-                        @* { *@
-                            @* <span class="badge bg-success">@enrollment.Course?.CourseName</span> *@
-                        @* } *@
-                    @* } *@
-                    @* @if (student.Course == null && (student.Enrollments == null || !student.Enrollments.Any())) *@
-                    {
-                        @* <span class="text-muted">Belum terdaftar</span> *@
-                    }
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-warning">Edit</a>
