@@ -1,6 +1,9 @@
 using WebMVC.Services;
 using Microsoft.EntityFrameworkCore;
 using WebMVC.Data;
+using Asp.Versioning;
+using Asp.Versioning.Routing;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -18,7 +21,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
-builder.Services.AddScoped<IEnrollmentService, EnrollmentService>(); // ✅ TAMBAHAN BARU
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>(); 
+
+
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.ConstraintMap.Add("apiVersion", typeof(ApiVersionRouteConstraint));
+});
 
 
 var app = builder.Build();
