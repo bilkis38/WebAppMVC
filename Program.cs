@@ -4,6 +4,7 @@ using WebMVC.Data;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 
+
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -30,6 +31,19 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
+//CORS Policy
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+            policy.WithOrigins("http://localhost:5056")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    });
+
+
+
 // Swagger Configuration
 builder.Services.AddSwaggerGen(options =>
 {
@@ -53,6 +67,8 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 var app = builder.Build();
+
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

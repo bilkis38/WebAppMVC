@@ -16,7 +16,7 @@
             <th>Nama</th>
             <th>Email</th>
             <th>Nomor Telepon</th>
-            @* <th>Course</th> *@
+            <th>Course</th>
             <th>Aksi</th>
         </tr>
     </thead>
@@ -28,6 +28,14 @@
                 <td>@(student.Email ?? "-")</td>
                 <td>@(student.PhoneNumber ?? "-")</td>
                 <td>
+                    @if (student.Course != null)
+                    {
+                        <span class="badge bg-primary">@student.Course.CourseName</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Belum terdaftar</span>
+                    }
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-warning">Edit</a>
